@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Breast Cancer Prediction Model</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f9fafb;
+        --text: #333;
+        --card-bg: #fff;
+        --border: #e5e7eb;
+        --primary: #e91e63;
+        --primary-dark: #c2185b;
+      }
+      body.dark {
+        --bg: #121212;
+        --text: #eee;
+        --card-bg: #1f1f1f;
+        --border: #333;
+        --primary: #f54291;
+        --primary-dark: #d32f75;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem 1rem;
+        transition: background 0.3s, color 0.3s;
+      }
+      h1 {
+        font-weight: 700;
+        margin-bottom: 1.2rem;
+        color: var(--primary);
+        text-align: center;
+      }
+      img.header-img {
+        max-width: 360px;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+      .theme-toggle {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: var(--primary);
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 42px;
+        height: 42px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.3s;
+      }
+      .theme-toggle:hover {
+        background: var(--primary-dark);
+      }
+      form {
+        width: 100%;
+        max-width: 500px;
+        background: var(--card-bg);
+        padding: 2rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        margin-bottom: 3rem;
+        transition: background 0.3s, border 0.3s;
+        position: relative;
+      }
+      label.form-label {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+      input.form-control {
+        background: #f3f4f6;
+        border: 1px solid #d1d5db;
+        color: #111;
+        font-size: 1rem;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        transition: all 0.2s;
+      }
+      body.dark input.form-control {
+        background: #2a2a2a;
+        border: 1px solid #444;
+        color: #eee;
+      }
+      input.form-control:focus {
+        border-color: var(--primary);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.15);
+      }
+      button.btn-primary {
+        background: var(--primary);
+        border: none;
+        font-weight: 600;
+        padding: 0.9rem 1.4rem;
+        font-size: 1rem;
+        border-radius: 8px;
+        width: 100%;
+        margin-top: 1rem;
+        transition: background-color 0.25s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      button.btn-primary:hover {
+        background: var(--primary-dark);
+      }
+      .spinner-border {
+        width: 1.2rem;
+        height: 1.2rem;
+        margin-left: 0.5rem;
+      }
+      .result-card {
+        background: var(--card-bg);
+        width: 100%;
+        max-width: 360px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+        margin-bottom: 3rem;
+        text-align: center;
+        transition: background 0.3s, border 0.3s, transform 0.3s;
+        animation: slideUp 0.5s ease forwards;
+      }
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .result-card img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+      }
+      .result-card .card-body {
+        padding: 1.5rem;
+      }
+      .result-card .card-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+      .result-card .card-text {
+        font-size: 1rem;
+        color: var(--text);
+      }
+      .result-card.not-cancerous {
+        border: 2px solid #4caf50;
+        box-shadow: 0 6px 16px rgba(76, 175, 80, 0.3);
+      }
+      .result-card.possible-cancerous {
+        border: 2px solid #f44336;
+        box-shadow: 0 6px 16px rgba(244, 67, 54, 0.3);
+      }
+      .result-card.not-cancerous .card-title {
+        color: #4caf50;
+      }
+      .result-card.possible-cancerous .card-title {
+        color: #f44336;
+      }
+      @media (max-width: 576px) {
+        img.header-img {
+          max-width: 100%;
+          height: 150px;
+          margin-bottom: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <button class="theme-toggle" id="themeToggle">🌙</button>
+    <h1>Breast Cancer Prediction Model</h1>
+    <img
+      src="{{ url_for('static', filename='img.png') }}"
+      alt="Breast Cancer Awareness"
+      class="header-img"
+    />
+
+    <form
+      id="predictionForm"
+      action="/predict"
+      method="POST"
+      autocomplete="off"
+      novalidate
+    >
+      <label for="feature" class="form-label"
+        >Enter Features (comma separated)</label
+      >
+      <input
+        type="text"
+        class="form-control"
+        id="feature"
+        name="feature"
+        placeholder="e.g. 12.4, 14.3, 90.2"
+        required
+      />
+      <button type="submit" class="btn btn-primary">
+        Predict
+        <span
+          class="spinner-border spinner-border-sm"
+          role="status"
+          aria-hidden="true"
+          style="display: none"
+          id="loader"
+        ></span>
+      </button>
+    </form>
+
+    {% if message %}
+    <div
+      class="result-card {% if message=='Not Cancerous' %}not-cancerous{% else %}possible-cancerous{% endif %}"
+    >
+      {% if message=="Not Cancerous" %}
+      <img
+        src="{{ url_for('static', filename='not_cancerous.jpeg') }}"
+        alt="Not Cancerous"
+      />
+      {% else %}
+      <img
+        src="{{ url_for('static', filename='images3.jpeg') }}"
+        alt="Possibly Cancerous"
+      />
+      {% endif %}
+      <div class="card-body">
+        <h5 class="card-title">{{ message }}</h5>
+        {% if confidence %}
+        <p class="card-text">Confidence: {{ confidence }}%</p>
+        {% endif %}
+        <form action="/download" method="POST">
+          <input type="hidden" name="features" value="{{ features }}" />
+          <input type="hidden" name="message" value="{{ message }}" />
+          <input type="hidden" name="confidence" value="{{ confidence }}" />
+          <button type="submit" class="btn btn-primary mt-2">
+            Download PDF Report
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
+    <script>
+      const toggleBtn = document.getElementById("themeToggle");
+      const body = document.body;
+      if (localStorage.getItem("theme") === "dark") {
+        body.classList.add("dark");
+        toggleBtn.textContent = "☀️";
+      }
+      toggleBtn.addEventListener("click", () => {
+        body.classList.toggle("dark");
+        if (body.classList.contains("dark")) {
+          localStorage.setItem("theme", "dark");
+          toggleBtn.textContent = "☀️";
+        } else {
+          localStorage.setItem("theme", "light");
+          toggleBtn.textContent = "🌙";
+        }
+      });
+      const form = document.getElementById("predictionForm");
+      const loader = document.getElementById("loader");
+      form.addEventListener("submit", () => {
+        loader.style.display = "inline-block";
+      });
+    </script>
+  </body>
+</html>
